@@ -1,8 +1,10 @@
 import './style.css'
 import view from './view.js'
-import * as yup from 'yup'
+import i18next from 'i18next'
+import ru from './locales/ru.js'
+import * as validators from './validators.js'
 
-const app = () => {
+const app = (i18nextInstance) => {
   const elements = {
     urlInput: document.getElementById('url-input'),
     form: document.body.querySelector('form'),
@@ -19,19 +21,14 @@ const app = () => {
     feeds: [],
   }
 
-  const watchedState = view(elements, state)
-
-  const validate = (url, addedUrls) => {
-    const schema = yup.string().url('Ссылка должна быть валидным URL').notOneOf(addedUrls, 'RSS уже существует')
-    return schema.validate(url)
-  }
+  const watchedState = view(elements, state, i18nextInstance)
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault()
     const inputValue = elements.urlInput.value
     watchedState.form.processState = 'processing'
 
-    validate(inputValue, state.feeds).then((url) => {
+    validators.validateUrl(inputValue, state.feeds).then((url) => {
       watchedState.form.processState = 'success'
       watchedState.form.valid = true
       watchedState.form.error = null
@@ -45,4 +42,12 @@ const app = () => {
   })
 }
 
-app()
+const i18nextInstance = i18next.createInstance()
+i18nextInstance.init({
+  lng: 'ru',
+  resources: {
+    ru,
+  },
+}).then(() => {
+  app(i18nextInstance)
+})

@@ -1,6 +1,6 @@
 import onChange from 'on-change'
 
-const view = (elements, state) => {
+const view = (elements, state, i18nextInstance) => {
   const render = () => {
     renderForm()
   }
@@ -18,7 +18,7 @@ const view = (elements, state) => {
     else if (state.form.processState === 'success') {
       elements.form.reset()
       elements.urlInput.focus()
-      elements.messageContainer.textContent = 'RSS успешно загружен'
+      elements.messageContainer.textContent = i18nextInstance.t('feed_added')
       elements.messageContainer.classList.remove('text-danger')
       elements.messageContainer.classList.add('text-success')
     }
@@ -28,7 +28,7 @@ const view = (elements, state) => {
     }
 
     if (state.form.error) {
-      elements.messageContainer.textContent = state.form.error
+      elements.messageContainer.textContent = i18nextInstance.t(state.form.error)
       elements.messageContainer.classList.remove('text-success')
       elements.messageContainer.classList.add('text-danger')
     }
