@@ -1,0 +1,23 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "author": "Viacheslav Korolev",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/create-config": "^1.11.0",
+    "@stylistic/eslint-plugin": "^5.6.1",
+    "eslint": "^9.39.1",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8"
+  }
+}
