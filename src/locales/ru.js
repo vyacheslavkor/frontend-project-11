@@ -9,5 +9,6 @@ export default {
     view: 'Просмотр',
     close: 'Закрыть',
     reed_more: 'Читать полностью',
+    error_empty_string: 'Не должно быть пустым',
   },
 }

@@ -61,7 +61,7 @@ const app = (i18nextInstance) => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault()
-    const url = elements.urlInput.value
+    const url = elements.urlInput.value.trim()
     watchedState.form.processState = 'processing'
 
     validators.validateUrl(url, state.feeds).then((url) => {
