@@ -5,6 +5,7 @@ import ru from './locales/ru.js'
 import * as validators from './validators.js'
 import axios from 'axios'
 import parse from './parsers.js'
+import _ from 'lodash'
 
 const app = (i18nextInstance) => {
   const elements = {
@@ -28,6 +29,28 @@ const app = (i18nextInstance) => {
 
   const watchedState = view(elements, state, i18nextInstance)
 
+  const updateFeeds = () => {
+    watchedState.feeds.forEach((feed) => {
+      const url = feed.url
+      axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`).then((response) => {
+        const domParser = new DOMParser()
+        const { posts } = parse(domParser.parseFromString(response.data.contents, 'text/xml'), url, feed)
+        const currentFeedPostsTitles = watchedState.posts.filter(post => post.feedId === feed.id).map(post => post.title)
+        const notAddedPosts = posts.filter(post => !_.includes(currentFeedPostsTitles, post.title))
+        if (notAddedPosts.length === 0) {
+          return
+        }
+
+        watchedState.posts = [...watchedState.posts, ...notAddedPosts]
+      }).catch()
+        .finally(() => {
+          setTimeout(() => {
+            updateFeeds()
+          }, 5000)
+        })
+    })
+  }
+
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault()
     const url = elements.urlInput.value
@@ -45,6 +68,10 @@ const app = (i18nextInstance) => {
       watchedState.form.valid = true
       watchedState.form.error = null
       elements.form.reset()
+
+      setTimeout(() => {
+        updateFeeds(watchedState)
+      }, 5000)
     })
       .catch((error) => {
         watchedState.form.valid = false

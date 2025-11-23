@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-const parse = (document, url) => {
+const parse = (document, url, existedFeed = {}) => {
   const rss = document.firstElementChild
   if (!rss || rss.length === 0 || rss.nodeName !== 'rss') {
     throw new Error('error_invalid_feed')
@@ -13,28 +13,32 @@ const parse = (document, url) => {
 
   const feedElement = channel.childNodes
 
-  const feed = {
-    id: _.uniqueId('feed_'),
-    url,
+  const feed = {}
+  if (!_.isEmpty(existedFeed)) {
+    _.assign(feed, existedFeed)
   }
+  else {
+    feed.id = _.uniqueId('feed_')
+    feed.url = url
 
-  feedElement.forEach((element) => {
-    const map = {
-      title: () => {
-        feed.title = element.textContent
-      },
-      description: () => {
-        feed.description = element.textContent
-      },
-    }
+    feedElement.forEach((element) => {
+      const map = {
+        title: () => {
+          feed.title = element.textContent
+        },
+        description: () => {
+          feed.description = element.textContent
+        },
+      }
 
-    const nodeName = element.nodeName
-    if (!_.has(map, nodeName)) {
-      return
-    }
+      const nodeName = element.nodeName
+      if (!_.has(map, nodeName)) {
+        return
+      }
 
-    map[nodeName]()
-  })
+      map[nodeName]()
+    })
+  }
 
   const posts = Array.from(feedElement).filter(item => item.nodeName === 'item').map((item) => {
     const post = {
