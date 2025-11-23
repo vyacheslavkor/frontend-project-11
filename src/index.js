@@ -7,6 +7,28 @@ import axios from 'axios'
 import parse from './parsers.js'
 import _ from 'lodash'
 
+const updateFeeds = (state) => {
+  state.feeds.forEach((feed) => {
+    const url = feed.url
+    axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`).then((response) => {
+      const domParser = new DOMParser()
+      const { posts } = parse(domParser.parseFromString(response.data.contents, 'text/xml'), url, feed)
+      const currentFeedPostsTitles = state.posts.filter(post => post.feedId === feed.id).map(post => post.title)
+      const notAddedPosts = posts.filter(post => !_.includes(currentFeedPostsTitles, post.title))
+      if (notAddedPosts.length === 0) {
+        return
+      }
+
+      state.posts = [...state.posts, ...notAddedPosts]
+    }).catch()
+      .finally(() => {
+        setTimeout(() => {
+          updateFeeds(state)
+        }, 5000)
+      })
+  })
+}
+
 const app = (i18nextInstance) => {
   const elements = {
     urlInput: document.getElementById('url-input'),
@@ -28,28 +50,6 @@ const app = (i18nextInstance) => {
   }
 
   const watchedState = view(elements, state, i18nextInstance)
-
-  const updateFeeds = () => {
-    watchedState.feeds.forEach((feed) => {
-      const url = feed.url
-      axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`).then((response) => {
-        const domParser = new DOMParser()
-        const { posts } = parse(domParser.parseFromString(response.data.contents, 'text/xml'), url, feed)
-        const currentFeedPostsTitles = watchedState.posts.filter(post => post.feedId === feed.id).map(post => post.title)
-        const notAddedPosts = posts.filter(post => !_.includes(currentFeedPostsTitles, post.title))
-        if (notAddedPosts.length === 0) {
-          return
-        }
-
-        watchedState.posts = [...watchedState.posts, ...notAddedPosts]
-      }).catch()
-        .finally(() => {
-          setTimeout(() => {
-            updateFeeds()
-          }, 5000)
-        })
-    })
-  }
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault()
