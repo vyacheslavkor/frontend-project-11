@@ -1,4 +1,5 @@
 import onChange from 'on-change'
+import _ from 'lodash'
 
 const initCard = (container, i18nextInstance) => {
   const cardElement = document.createElement('div')
@@ -19,11 +20,52 @@ const initCard = (container, i18nextInstance) => {
   container.append(cardElement)
 }
 
+const viewPostHandler = (e, state) => {
+  const postElement = e.target
+  const postId = postElement.dataset.id
+
+  if (!_.includes(state.viewedPosts, postId)) {
+    state.viewedPosts.push(postId)
+  }
+}
+
+const modalHandler = (e, state) => {
+  e.preventDefault()
+  const postElement = e.target
+  state.ui.modal.postId = postElement.dataset.id
+}
+
 const view = (elements, state, i18nextInstance) => {
   const render = () => {
     renderForm()
     renderFeeds()
     renderPosts()
+    renderModal()
+  }
+
+  const watchedState = onChange(state, () => {
+    render()
+  })
+
+  const renderModal = () => {
+    const modalTitleElement = elements.modal.querySelector('.modal-title')
+    modalTitleElement.textContent = ''
+
+    const modalBody = elements.modal.querySelector('.modal-body')
+    modalBody.textContent = ''
+
+    const fullArticleLink = elements.modal.querySelector('.full-article')
+    fullArticleLink.href = '#'
+
+    if (state.ui.modal.postId === null) {
+      return
+    }
+
+    const post = _.first(state.posts.filter(post => post.id === state.ui.modal.postId))
+
+    fullArticleLink.href = post.link
+    modalBody.textContent = post.description
+    modalTitleElement.textContent = post.title
   }
 
   const renderFeeds = () => {
@@ -67,7 +109,14 @@ const view = (elements, state, i18nextInstance) => {
 
       const linkElement = document.createElement('a')
       linkElement.href = post.link
-      linkElement.classList.add('fw-bold')
+      console.log(state.viewedPosts)
+      if (_.includes(state.viewedPosts, post.id)) {
+        linkElement.classList.add('fw-normal')
+      }
+      else {
+        linkElement.classList.add('fw-bold')
+      }
+
       linkElement.dataset.id = post.id
       linkElement.target = '_blank'
       linkElement.rel = 'noopener noreferrer'
@@ -84,6 +133,10 @@ const view = (elements, state, i18nextInstance) => {
       listItem.append(linkElement, button)
 
       list.append(listItem)
+
+      linkElement.addEventListener('click', e => viewPostHandler(e, watchedState))
+      button.addEventListener('click', e => viewPostHandler(e, watchedState))
+      button.addEventListener('click', e => modalHandler(e, watchedState))
     })
   }
 
@@ -116,9 +169,7 @@ const view = (elements, state, i18nextInstance) => {
     }
   }
 
-  return onChange(state, () => {
-    render()
-  })
+  return watchedState
 }
 
 export default view

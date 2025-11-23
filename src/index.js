@@ -6,6 +6,7 @@ import * as validators from './validators.js'
 import axios from 'axios'
 import parse from './parsers.js'
 import _ from 'lodash'
+import 'bootstrap'
 
 const updateFeeds = (state) => {
   state.feeds.forEach((feed) => {
@@ -37,6 +38,7 @@ const app = (i18nextInstance) => {
     messageContainer: document.body.querySelector('.feedback'),
     postsContainer: document.body.querySelector('.posts'),
     feedsContainer: document.body.querySelector('.feeds'),
+    modal: document.getElementById('modal'),
   }
 
   const state = {
@@ -47,6 +49,12 @@ const app = (i18nextInstance) => {
     },
     feeds: [],
     posts: [],
+    viewedPosts: [],
+    ui: {
+      modal: {
+        postId: null,
+      },
+    },
   }
 
   const watchedState = view(elements, state, i18nextInstance)
