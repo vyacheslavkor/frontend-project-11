@@ -10,5 +10,6 @@ export default {
     close: 'Закрыть',
     reed_more: 'Читать полностью',
     error_empty_string: 'Не должно быть пустым',
+    error_bad_connection: 'Ошибка сети',
   },
 }

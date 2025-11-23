@@ -64,26 +64,28 @@ const app = (i18nextInstance) => {
     const url = elements.urlInput.value.trim()
     watchedState.form.processState = 'processing'
 
-    validators.validateUrl(url, state.feeds).then((url) => {
-      return axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
-    }).then((response) => {
-      const domParser = new DOMParser()
-      const { feed, posts } = parse(domParser.parseFromString(response.data.contents, 'text/xml'), url)
-      watchedState.feeds.push(feed)
-      watchedState.posts = [...watchedState.posts, ...posts]
+    validators.validateUrl(url, state.feeds)
+      .then((url) => {
+        return axios.get(`https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`)
+      })
+      .then((response) => {
+        const domParser = new DOMParser()
+        const { feed, posts } = parse(domParser.parseFromString(response.data.contents, 'text/xml'), url)
+        watchedState.feeds.push(feed)
+        watchedState.posts = [...watchedState.posts, ...posts]
 
-      watchedState.form.processState = 'success'
-      watchedState.form.valid = true
-      watchedState.form.error = null
-      elements.form.reset()
+        watchedState.form.processState = 'success'
+        watchedState.form.valid = true
+        watchedState.form.error = null
+        elements.form.reset()
 
-      setTimeout(() => {
-        updateFeeds(watchedState)
-      }, 5000)
-    })
+        setTimeout(() => {
+          updateFeeds(watchedState)
+        }, 5000)
+      })
       .catch((error) => {
         watchedState.form.valid = false
-        watchedState.form.error = error.message
+        watchedState.form.error = axios.isAxiosError(error) ? 'error_bad_connection' : error.message
         watchedState.form.processState = 'filling'
       })
   })
